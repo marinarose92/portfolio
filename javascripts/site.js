@@ -1,0 +1,1 @@
+function typeWriter(){i<txt.length&&(document.getElementById("text").innerHTML+=txt.charAt(i),i++,setTimeout(typeWriter,speed))}var i=0,txt="Lorem ipsum typing effect!",speed=50;
