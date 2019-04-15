@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Use the title from a page's frontmatter if it has one -->
+    <title>Google Fu - Github Pages, Middleman and Custom Domains</title>
+    <link href="../../stylesheets/site.css" rel="stylesheet" />
+    <script src="../../javascripts/site.js"></script>
+    <div class="logo">
+    <a href="https://marinarose.dev"><img src="https://i.imgur.com/OZ9uQI6.png" width="100px"></a>
+    </div>
+    <div class="navigation">
+    <ul>
+    <li><a href="/work">work</a></li>
+    <li> // </li>
+    <li><a href="/blog">blog</a></li>
+    <li> // </li>
+    <li><a href="/about">about</a></li>
+    </ul>
+  </div>
+    <div class="blog-title">
+        <h1>
+            Google Fu - Github Pages, Middleman and Custom Domains
+        </h1>
+    </div>
+  </head>
+  <div class="article">
+    <p>Google Fu is a series where I document exactly how I solve issues I run into using Google.</p>
+
+<p>Some background first: </p>
+
+<p>I bought my custom domain and decided to host my page with Github Pages. I had a problem, though. I thought I had set everything up correctly, but every time I deployed my Middleman page, my custom domain would suddenly stop working and my domain settings would be wiped. To get it to work again, I would have to go into the settings of my Github repo and re-add my custom domain… until it was time to deploy some more changes.</p>
+
+<p>My problem involves:</p>
+
+<ul>
+<li>Github Pages</li>
+<li>Middleman (for Ruby)</li>
+<li>Domain routing rules</li>
+</ul>
+
+<p>One or more of these settings could be causing the issue. I set out on solving the issue the same way I always do: Google it. <span class="google">middleman github pages forgets custom domain</span></p>
+
+<p>Notice my query contains everything I&rsquo;m searching for all in one. </p>
+
+<p>The first result was a guide someone had written up, but I skimmed it and it didn&rsquo;t get into enough detail for me.</p>
+
+<p>This was in the second result:</p>
+
+<p><img src="https://i.imgur.com/bTY5YU1.png" alt="Bty5yu1" /></p>
+
+<p>It’s a short one, but it does have an answer! Unfortunately, we don’t know if this answer worked for the user but we can sure try it out.</p>
+
+<p>It sounds like I need a CNAME record somewhere in my repo, probably the root. I want further clarification on how to do this, so next I google: <span class="google">CNAME record github pages</span></p>
+
+<p>This takes me to some Github documentation that tells me how to set up my CNAME record, and what to put in it. </p>
+
+<p>I happen to know about CNAME records because I do some server management at my job, but if I didn’t, now I would probably take a bit to read up on what it is, just so I have an understanding of what I&rsquo;m doing.</p>
+
+<p>Once I’ve done this, I deploy my repo again - and the same thing happens - problem not fixed.</p>
+
+<p>I check again that the record I just created (basically a text file) exists locally, and then I check my Github repo. Even though my record was in the correct directory it wasn’t pushing.</p>
+
+<p>Next query: <span class="google">github local files not pushing</span></p>
+
+<p>I skim through the results of other people asking the same question. Their problems seem slightly different than mine, though. Git isn’t giving me any errors when I try to check if there are problems, unlike the majority of users who asked the same thing.</p>
+
+<p>Then I think about <em>how</em> I push my repo. Instead of using the usual <code>git push origin master</code> I was using the command <code>middleman deploy</code> from the same-named Gem that helps along the process of setting up your project with Github pages. Maybe there’s something specific about pushing this way?</p>
+
+<p>Next query: <span class="google">middleman deploy CNAME record</span></p>
+
+<p>The first result contained this:</p>
+
+<p><img src="https://i.imgur.com/FymbHkF.png" alt="Fymbhkf" /></p>
+
+<p>Which actually worked for me!</p>
+
+<p>I couldn’t find my answer in one query, but I did a little more research, and it led me to find something that worked.</p>
+
+  </div>
+  <div class="made-by">
+  This site was built with <a href="https://middlemanapp.com/" target="_blank">Middleman</a>
+  </div>
+</html>
