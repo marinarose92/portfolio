@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Use the title from a page's frontmatter if it has one -->
+    <title>How I used Ruby to automate a tedious project</title>
+    <link href="../../stylesheets/site.css" rel="stylesheet" />
+    <link href="../../stylesheets/highlighting.css" rel="stylesheet" />
+    <script src="../../javascripts/site.js"></script>
+    <a href="https://marinarose.dev"><div class="logo"></div></a>
+    <div class="navigation">
+    <ul>
+    <li><a href="/work">work</a></li>
+    <li> &#x1F354 </li>
+    <li><a href="/blog">blog</a></li>
+    <li> &#x1F354 </li>
+    <li><a href="/about">about</a></li>
+    </ul>
+  </div>
+    <div class="blog-title">
+        <h1>
+            How I used Ruby to automate a tedious project
+        </h1>
+    </div>
+  </head>
+  <div class="article">
+    <p>At my job, I wear many hats. One of them more recently has been email administration for an entire library consortium.</p>
+
+<p>One of the tasks I was given is to sort through an Excel sheet of 1500 users - most of which were repeated more than once - and find the handful of them whose email domain names were changing and update their addresses. So basically I just needed to change <code>firstname.lastname@website.org</code> to <code>firstname.lastname@library.website.org</code> for about a hundred or so different users every time they appear.</p>
+
+<p>Usually this would be a pretty simple search &amp; replace solution but I had a couple of obstacles:</p>
+
+<ul>
+<li>There were nine libraries migrating to nine unique subdomains.</li>
+<li>Since the users’ old accounts had a generic @website.org address, there was no way of telling who belonged to which library so I had to constantly refer back to a list of users to make sure I was assigning them to the correct subdomain.</li>
+<li>There were users with the @website.org domain who were staying the same, so I couldn’t just do a batch-replace per library, even if I had an idea of who belonged where.</li>
+<li>The people whose e-mail domains I had to change were repeated in more than one place, which means I would need to make several replacements per user.</li>
+</ul>
+
+<p>I really, really have a poor attention span for tedious tasks and I was eager to get out of doing this manually as best as I could. Then I had an idea: Ruby.</p>
+
+<p>I had previously finished a project of building a command line Hangman game that used serialization to import and export external files. I wanted to use that knowledge to help me here, so I switched over to my laptop running Linux and I opened a blank file.</p>
+
+<p>The first thing I did was make two separate text files: one of the users’ old email addresses and one of the users’ new email addresses. It looked a little like this:</p>
+<div class="highlight"><pre class="highlight plaintext"><code>    old_emails.txt
+    user1@website.org
+    user2@website.org
+    user3@website.org
+
+
+    new_emails.txt
+    user1@library1.website.org
+    user2@library2.website.org
+    user3@library3.org
+</code></pre></div>
+<p>They were already sorted in the exact same order because I had this information in two cells of a spreadsheet.</p>
+
+<p>I knew I wanted to map one value to another and then use that information to only change the affected users. I had only worked with hashes peripherally and didn’t really understand how they might be useful in certain situations, but it finally made sense.</p>
+
+<p>The first thing I did was create a class and some class variables that would take the information from the files and eventually turn them into an array.</p>
+<div class="highlight"><pre class="highlight ruby"><code><span class="vc">@@emails_new</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"emails_new.txt"</span><span class="p">)</span>
+<span class="vc">@@emails_old</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"emails_old.txt"</span><span class="p">)</span>
+<span class="vc">@@emails_new_arr</span> <span class="o">=</span> <span class="vc">@@emails_new</span><span class="p">.</span><span class="nf">split</span><span class="p">()</span>
+<span class="vc">@@emails_old_arr</span> <span class="o">=</span> <span class="vc">@@emails_old</span><span class="p">.</span><span class="nf">split</span><span class="p">()</span>
+</code></pre></div>
+<p>Once I had two arrays of e-mail addresses, I googled how to create a hash using two ordered arrays to create a key-value pair. </p>
+<div class="highlight"><pre class="highlight ruby"><code><span class="n">emails_hash</span> <span class="o">=</span> <span class="p">[</span><span class="vc">@@emails_old_arr</span><span class="p">,</span> <span class="vc">@@emails_new_arr</span> <span class="p">.</span><span class="nf">transpose</span><span class="p">.</span><span class="nf">to_h</span><span class="sb">`
+</span></code></pre></div>
+<p>And it worked!</p>
+
+<p>Then I made another text file consisting of my original list of 1500+ users with the old addresses that needed to be changed.</p>
+<div class="highlight"><pre class="highlight ruby"><code><span class="vc">@@all_emails</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"all_emails.txt"</span><span class="p">)</span>
+<span class="vc">@@all_emails_arr</span> <span class="o">=</span> <span class="vc">@@all_emails</span><span class="p">.</span><span class="nf">split</span><span class="p">()</span>
+</code></pre></div>
+<p>And finally, an array to store the changed results:</p>
+<div class="highlight"><pre class="highlight ruby"><code><span class="vc">@@fixed_emails_arr</span> <span class="o">=</span> <span class="p">[]</span>
+</code></pre></div>
+<p>Now I was ready to start working on logic. I wanted to sort through every user in my <code>@@all_emails_arr array</code>, but don&rsquo;t change the ones that we don&rsquo;t need to change. I figured the best way to do it would just be to compare each e-mail with each key in the hash. To demonstrate, my hash looked like this:</p>
+<div class="highlight"><pre class="highlight ruby"><code>    <span class="n">emails_hash</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"user1@website.org"</span> <span class="o">=&gt;</span> <span class="s2">"user1@library1.website.org"</span>
+        <span class="s2">"user2@website.org"</span> <span class="o">=&gt;</span> <span class="s2">"user2@library2.website.org"</span>
+        <span class="s2">"user3@website.org"</span> <span class="o">=&gt;</span> <span class="s2">"user3@library3.website.org"</span>
+    <span class="p">}</span>
+</code></pre></div>
+<p>Then, if it did indeed match, then I wanted to replace the original e-mail with the key&rsquo;s value - the corrected e-mail. </p>
+<div class="highlight"><pre class="highlight ruby"><code>    <span class="c1"># iterate through all addresses (in alphabetical order)</span>
+    <span class="vc">@@all_emails_arr</span><span class="p">.</span><span class="nf">sort!</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">email</span><span class="o">|</span>
+        <span class="c1"># if the email matches a hash key</span>
+        <span class="k">if</span> <span class="n">emails_hash</span><span class="p">.</span><span class="nf">has_key?</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+        <span class="c1"># push the hash *value* to the final array</span>
+        <span class="vc">@@fixed_emails_arr</span> <span class="o">&lt;&lt;</span> <span class="n">emails_hash</span><span class="p">.</span><span class="nf">values_at</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">else</span>
+        <span class="c1"># push the current value to the array</span>
+        <span class="vc">@@fixed_emails_arr</span> <span class="o">&lt;&lt;</span> <span class="n">email</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+</code></pre></div>
+<p>This worked! But I needed a better way to output the changed data since there was so much of it. It would be ideal if I could just print it out into a text file as a list that I could just copy back into my spreadsheet.</p>
+
+<p>The second part of our Hangman project was to save our game state using <code>YAML</code>. I remembered how it printed out the arrays I saved in a nice little list and decided to see if it could do the job!</p>
+
+<p>I added this bit of code to do the work:</p>
+<div class="highlight"><pre class="highlight ruby"><code><span class="n">yaml</span> <span class="o">=</span> <span class="no">YAML</span><span class="p">.</span><span class="nf">dump</span><span class="p">({</span>
+        <span class="ss">:fixed_emails_arr</span> <span class="o">=&gt;</span> <span class="vc">@@fixed_emails_arr</span>
+    <span class="p">})</span>
+    <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="s2">"new_emails.yml"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">){</span><span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">yaml</span><span class="p">)}</span>
+</code></pre></div>
+<p>I ran my code again, crossed my fingers, and checked my newly generated <code>new_emails.yml</code> file.</p>
+<div class="highlight"><pre class="highlight yaml"><code><span class="pi">-</span> <span class="s">user1@library1.website.org</span>
+<span class="pi">-</span> <span class="s">user2@library2.website.org</span>
+<span class="pi">-</span> <span class="s">user3@library3.website.org</span>
+</code></pre></div>
+<p>All I had to do was bulk replace the &lsquo;- &rsquo; with nothing to remove that undesired bit, but then I was ready to replace the contents of my spreadsheet with my updated information.</p>
+
+<p>It took me about 40 minutes to code this and I&rsquo;m confident it saved me more than a couple hours of mindless and tedious work. I ended up feeling super proud of finding a way around it and using my Ruby knowledge along the way! </p>
+
+<p>I don&rsquo;t doubt there are alternative or even massively easier ways to figure this out. But I figured it would be fun to share how I did.</p>
+
+<p>Here is my final code:</p>
+<div class="highlight"><pre class="highlight ruby"><code><span class="k">class</span> <span class="nc">EmailMigration</span>
+<span class="nb">require</span> <span class="s1">'yaml'</span>
+
+<span class="vc">@@emails_new</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"emails_new.txt"</span><span class="p">)</span>
+<span class="vc">@@emails_old</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"emails_old.txt"</span><span class="p">)</span>
+<span class="vc">@@all_emails</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">"all_emails.txt"</span><span class="p">)</span>
+<span class="vc">@@all_emails_arr</span> <span class="o">=</span> <span class="vc">@@all_emails</span><span class="p">.</span><span class="nf">split</span><span class="p">()</span>
+<span class="vc">@@emails_new_arr</span> <span class="o">=</span> <span class="vc">@@emails_new</span><span class="p">.</span><span class="nf">split</span><span class="p">()</span>
+<span class="vc">@@emails_old_arr</span> <span class="o">=</span> <span class="vc">@@emails_old</span><span class="p">.</span><span class="nf">split</span><span class="p">()</span>
+<span class="vc">@@fixed_emails_arr</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">emails_hash</span> <span class="o">=</span> <span class="p">[</span><span class="vc">@@emails_old_arr</span><span class="p">,</span> <span class="vc">@@emails_new_arr</span><span class="p">].</span><span class="nf">transpose</span><span class="p">.</span><span class="nf">to_h</span>
+
+    <span class="vc">@@all_emails_arr</span><span class="p">.</span><span class="nf">sort!</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">email</span><span class="o">|</span>
+        <span class="k">if</span> <span class="n">emails_hash</span><span class="p">.</span><span class="nf">has_key?</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+        <span class="vc">@@fixed_emails_arr</span> <span class="o">&lt;&lt;</span> <span class="n">emails_hash</span><span class="p">.</span><span class="nf">values_at</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">else</span>
+        <span class="vc">@@fixed_emails_arr</span> <span class="o">&lt;&lt;</span> <span class="n">email</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="n">yaml</span> <span class="o">=</span> <span class="no">YAML</span><span class="p">.</span><span class="nf">dump</span><span class="p">({</span>
+        <span class="ss">:fixed_emails_arr</span> <span class="o">=&gt;</span> <span class="vc">@@fixed_emails_arr</span>
+    <span class="p">})</span>
+    <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="s2">"new_emails.yml"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">){</span><span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">yaml</span><span class="p">)}</span>
+<span class="k">end</span>
+
+</code></pre></div>
+  </div>
+  <div class="made-by">
+  This site was built with <a href="https://middlemanapp.com/" target="_blank">Middleman</a>
+  </div>
+</html>

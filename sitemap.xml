@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://marinarose.dev/</loc>
-    <lastmod>2019-04-15T12:34:57-04:00</lastmod>
+    <lastmod>2019-04-19T15:20:08-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -27,6 +27,12 @@
   <url>
     <loc>https://marinarose.dev/blog/mastering-the-art-of-google/</loc>
     <lastmod>2019-04-14T19:23:34-04:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://marinarose.dev/blog/how-i-used-ruby-to-automate-a-tedious-project/</loc>
+    <lastmod>2019-04-19T15:19:03-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
