@@ -2,13 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://marinarose.dev/</loc>
-    <lastmod>2019-05-03T14:56:06-04:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://marinarose.dev/about/</loc>
-    <lastmod>2019-04-15T13:18:43-04:00</lastmod>
+    <lastmod>2019-05-30T11:19:40-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -26,7 +20,7 @@
   </url>
   <url>
     <loc>https://marinarose.dev/blog/mastering-the-art-of-google/</loc>
-    <lastmod>2019-04-14T19:23:34-04:00</lastmod>
+    <lastmod>2019-05-30T10:25:21-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
